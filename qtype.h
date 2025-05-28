@@ -1,8 +1,12 @@
-#pragma once
+#ifndef _QTYPE_H  // header guard
+#define _QTYPE_H
+
 #include <mutex>
 #include <atomic>
 
-typedef int Key;
+// ==========이 파일은 수정 가능==========
+
+typedef unsigned int Key;  // 값이 클수록 높은 우선순위
 typedef void* Value;
 
 typedef struct {
@@ -11,13 +15,15 @@ typedef struct {
 } Item;
 
 typedef struct {
-    bool success; // true: 성공, false: 실패
+    bool success;   // true: 성공, false: 실패
     Item item;
+    // 필드 추가 가능
 } Reply;
 
 typedef struct node_t {
     Item item;
     struct node_t* next;
+    // 필드 추가 가능
 } Node;
 
 typedef struct {
@@ -25,6 +31,7 @@ typedef struct {
     Node* tail;
     std::mutex queue_mutex;
     std::atomic<int> size;
+    // 필드 추가 가능
 } Queue;
 
 // 우선순위 큐 연산을 위한 함수 선언
@@ -35,3 +42,7 @@ bool isEmpty(Queue* q);
 int getSize(Queue* q);
 void initQueue(Queue* q);
 void destroyQueue(Queue* q);
+
+// 이후 자유롭게 추가/수정: 새로운 자료형 정의 등
+
+#endif
