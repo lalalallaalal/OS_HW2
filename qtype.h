@@ -34,15 +34,6 @@ typedef struct {
     // 필드 추가 가능
 } Queue;
 
-// 우선순위 큐 연산을 위한 함수 선언
-Reply enqueue(Queue* q, Key key, Value value);
-Reply dequeue(Queue* q);
-Reply peek(Queue* q);
-bool isEmpty(Queue* q);
-int getSize(Queue* q);
-void initQueue(Queue* q);
-void destroyQueue(Queue* q);
-
 // 이후 자유롭게 추가/수정: 새로운 자료형 정의 등
 
 #endif
