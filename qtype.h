@@ -3,7 +3,7 @@
 #include <atomic>
 
 typedef int Key;
-typedef int Value;
+typedef void* Value;
 
 typedef struct {
     Key key;
@@ -11,7 +11,7 @@ typedef struct {
 } Item;
 
 typedef struct {
-    bool success; // true: ¼º°ø, false: ½ÇÆĞ
+    bool success; // true: ì„±ê³µ, false: ì‹¤íŒ¨
     Item item;
 } Reply;
 
@@ -27,7 +27,7 @@ typedef struct {
     std::atomic<int> size;
 } Queue;
 
-// ¿ì¼±¼øÀ§ Å¥ ¿¬»êÀ» À§ÇÑ ÇÔ¼ö ¼±¾ğ
+// ìš°ì„ ìˆœìœ„ í ì—°ì‚°ì„ ìœ„í•œ í•¨ìˆ˜ ì„ ì–¸
 Reply enqueue(Queue* q, Key key, Value value);
 Reply dequeue(Queue* q);
 Reply peek(Queue* q);
