@@ -1,73 +1,32 @@
-#include "queue.h"
-#include "qtype.h"
 #include <iostream>
-#include <thread>
-#include <atomic>
-#include <mutex>
+#include <new>
+#include "queue.h"
 
-// ¿ì¼±¼øÀ§ Å¥¸¦ À§ÇÑ ¹è¿­ ±â¹Ý ÀÌÁø Èü ±¸Á¶
-typedef struct {
-    Item* heap;           // Èü ¹è¿­
-    int capacity;         // ÃÖ´ë ¿ë·®
-    std::atomic<int> size; // ÇöÀç Å©±â
-    std::mutex heap_mutex; // Èü ¿¬»ê¿ë ¹ÂÅØ½º
-} PriorityQueue;
-
-// Àü¿ª ¿ì¼±¼øÀ§ Å¥
-static PriorityQueue* global_pq = nullptr;
-
-// Èü ÀÎµ¦½º °è»ê ÇÔ¼öµé
-int parent(int i) { return (i - 1) / 2; }
-int leftChild(int i) { return 2 * i + 1; }
-int rightChild(int i) { return 2 * i + 2; }
-
-// ¿ä¼Ò ±³È¯ ÇÔ¼ö
-void swap(Item* heap, int i, int j) {
-    Item temp = heap[i];
-    heap[i] = heap[j];
-    heap[j] = temp;
-}
-
-// ¿ì¼±¼øÀ§ ºñ±³ (Key °ªÀÌ ³ôÀ»¼ö·Ï ¿ì¼±¼øÀ§°¡ ³ôÀ½)
-bool hasHigherPriority(const Item& a, const Item& b) {
-    return a.key > b.key;
-}
-
-// Èü ¼Ó¼º À¯Áö - »óÇâ Á¤·Ä
-void heapifyUp(Item* heap, int index) {
-    while (index > 0) {
-        int parentIndex = parent(index);
-        if (hasHigherPriority(heap[index], heap[parentIndex])) {
-            swap(heap, index, parentIndex);
-            index = parentIndex;
-        }
-        else {
-            break;
-        }
+Queue* init(void) {
+    try {
+        Queue* queue = new Queue;
+        queue->head = nullptr;
+        queue->tail = nullptr;
+        queue->size = 0;
+        return queue;
+    }
+    catch (std::bad_alloc&) {
+        return nullptr;
     }
 }
 
-// Èü ¼Ó¼º À¯Áö - ÇÏÇâ Á¤·Ä
-void heapifyDown(Item* heap, int size, int index) {
-    while (true) {
-        int largest = index;
-        int left = leftChild(index);
-        int right = rightChild(index);
+void release(Queue* queue) {
+    if (queue == nullptr) return;
 
-        if (left < size && hasHigherPriority(heap[left], heap[largest])) {
-            largest = left;
+    {
+        std::lock_guard<std::mutex> lock(queue->queue_mutex);
+        Node* current = queue->head;
+        while (current != nullptr) {
+            Node* temp = current;
+            current = current->next;
+            delete temp;
         }
+    }  // ì—¬ê¸°ì„œ lock í•´ì œ
 
-        if (right < size && hasHigherPriority(heap[right], heap[largest])) {
-            largest = right;
-        }
-
-        if (largest != index) {
-            swap(heap, index, largest);
-            index = largest;
-        }
-        else {
-            break;
-        }
-    }
+    delete queue;
 }
