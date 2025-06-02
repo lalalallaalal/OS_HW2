@@ -63,3 +63,43 @@ Node* nclone(Node* node) {
         return nullptr;
     }
 }
+
+Reply enqueue(Queue* queue, Item item) {
+    Reply reply = { false, {0, nullptr} };
+
+    if (queue == nullptr) return reply;
+
+    Node* newNode = nalloc(item);
+    if (newNode == nullptr) return reply;
+
+    std::lock_guard<std::mutex> lock(queue->queue_mutex);
+
+    // 우선순위 큐: 키값이 클수록 앞에 위치
+    if (queue->head == nullptr || queue->head->item.key < item.key) {
+        // 맨 앞에 삽입
+        newNode->next = queue->head;
+        queue->head = newNode;
+        if (queue->tail == nullptr) {
+            queue->tail = newNode;
+        }
+    }
+    else {
+        // 적절한 위치 찾아서 삽입
+        Node* current = queue->head;
+        while (current->next != nullptr && current->next->item.key >= item.key) {
+            current = current->next;
+        }
+        newNode->next = current->next;
+        current->next = newNode;
+        if (newNode->next == nullptr) {
+            queue->tail = newNode;
+        }
+    }
+
+    queue->size++;
+    reply.success = true;
+    reply.item = item;
+
+    return reply;
+}
+
