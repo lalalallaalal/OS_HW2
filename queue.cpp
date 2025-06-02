@@ -103,3 +103,46 @@ Reply enqueue(Queue* queue, Item item) {
     return reply;
 }
 
+Reply dequeue(Queue* queue) {
+    Reply reply = { false, {0, nullptr} };
+
+    if (queue == nullptr) return reply;
+
+    std::lock_guard<std::mutex> lock(queue->queue_mutex);
+
+    if (queue->head == nullptr) return reply;
+
+    Node* nodeToRemove = queue->head;
+    reply.item = nodeToRemove->item;
+
+    queue->head = queue->head->next;
+    if (queue->head == nullptr) {
+        queue->tail = nullptr;
+    }
+
+    nfree(nodeToRemove);
+    queue->size--;
+    reply.success = true;
+
+    return reply;
+}
+
+Queue* range(Queue* queue, Key start, Key end) {
+    if (queue == nullptr) return nullptr;
+
+    Queue* rangeQueue = init();
+    if (rangeQueue == nullptr) return nullptr;
+
+    std::lock_guard<std::mutex> lock(queue->queue_mutex);
+
+    Node* current = queue->head;
+    while (current != nullptr) {
+        if (current->item.key >= start && current->item.key <= end) {
+            // 범위에 맞는 노드를 새 큐에 추가
+            enqueue(rangeQueue, current->item);
+        }
+        current = current->next;
+    }
+
+    return rangeQueue;
+}
