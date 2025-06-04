@@ -34,6 +34,14 @@ typedef struct {
     // 필드 추가 가능
 } Queue;
 
-// 이후 자유롭게 추가/수정: 새로운 자료형 정의 등
+// 깊은 복사를 위한 함수 포인터 타입 정의
+typedef Value(*ValueCloneFunc)(Value value);
+typedef void (*ValueFreeFunc)(Value value);
+
+// 전역 함수 포인터
+extern ValueCloneFunc global_value_clone;
+extern ValueFreeFunc global_value_free;
+
+void set_value_handlers(ValueCloneFunc clone_func, ValueFreeFunc free_func);
 
 #endif
